@@ -32,6 +32,7 @@ def ensure_correct_matrix(matrix):
 def matrix_extractor(matrix, row, col, move_range):
     """Extracts a list of numbers that are in move range from a number at position [row][column]."""
     result = []
+    row_helper = move_range
 
     for i in range(move_range + 1):
         negative_row = (row - move_range + i) < 0
@@ -50,17 +51,17 @@ def matrix_extractor(matrix, row, col, move_range):
                     result.extend(matrix[row - move_range + i][col - i:col + i + 1])
 
     for i in range(move_range):
-        negative_col = col - i - 1 < 0
+        negative_col = col - i < 0
         try:
-            matrix[row + i + 1]
+            matrix[row+row_helper]
         except IndexError:
             continue
         else:
             if negative_col:
-                result.extend(matrix[row + i + 1][0:col - i + 2])
+                result.extend(matrix[row+row_helper][0:col+i+1])
             else:
-                result.extend(matrix[row + i + 1][col + i - 1:col - i + 2])
-                continue
+                result.extend(matrix[row+row_helper][col-i:col + i + 1])
+        row_helper -= 1
 
     result.remove(matrix[row][col])
     return result
@@ -99,22 +100,21 @@ def matrix_solver(matrix: list, conditions: list):
                 result.append(matrix[row][col])
     return result
 
-# to do, convert strings to ints: def ensure_ints(matrix), ensure_matrix, ensure_dict_conditions, if int return on if 0 0?
 
 
 if __name__ == "__main__":
 
     string = '''52 9 35 11 18 16 80 7 21
-    29 15 70 89 75 9 78 86 4
-    58 26 4 6 70 52 15 72 84
-    17 37 85 54 53 87 38 97 9
-    72 21 92 83 38 2 39 56 84
-    43 61 25 96 33 19 48 39 56
-    54 62 4 47 53 17 49 31 61
-    31 94 29 7 46 11 4 75 88
-    46 8 74 96 83 51 65 36 5'''
+                29 15 70 89 75 9 78 86 4
+                58 26 4 6 70 52 15 72 84
+                17 37 85 54 53 87 38 97 9
+                72 21 92 83 38 2 39 56 84
+                43 61 25 96 33 19 48 39 56
+                54 62 4 47 53 17 49 31 61
+                31 94 29 7 46 11 4 75 88
+                46 8 74 96 83 51 65 36 5'''
 
-    matrix = [rows.split() for rows in string.split("\n")]
+    matrix = ensure_correct_matrix(string)
     m2 = [[column for column in row[:5]] for row in matrix[:5]]
 
     conditions = [(6,5), (2,-12), (7, -4), (3,15)]
@@ -122,3 +122,14 @@ if __name__ == "__main__":
 
     print(matrix_solver(matrix, conditions))
     print(matrix_solver(m2, c2))
+
+    a = matrix_extractor(matrix, 4, 3, 3)
+    b = matrix_extractor(matrix, 1, 1, 3)
+
+    expected = [89, 4, 6, 70, 37, 85, 54, 53, 87, 72, 21, 92, 38, 2, 39, 61, 25, 96, 33, 19, 4, 47, 53, 7]
+    expected2 = [52, 9, 35, 11, 29, 70, 89, 75, 58, 26, 4, 6, 17, 37, 85, 21]
+    print(sorted(a))
+    print(sorted(expected))
+    print(b)
+    print(sorted(a) == sorted(expected))
+    print(sorted(b) == sorted(expected2))
